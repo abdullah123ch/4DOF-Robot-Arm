@@ -1,5 +1,7 @@
 # CamTracker Documentation
 
+[< Back to Project Root](../README.md)
+
 ## Overview
 
 This Python script serves as the "eyes" of the robot. It captures video from a webcam, tracks the user's hand in real-time using Google MediaPipe, translates hand movements into servo angles, and sends them to the robot via Serial (UART).
@@ -11,13 +13,26 @@ This Python script serves as the "eyes" of the robot. It captures video from a w
 - **PySerial (`serial`)**: Handles communication with the robot controller (Tiva C).
 - **Math (`math`)**: Used for geometry calculations (e.g., pinch distance).
 
-## Code Walkthrough & Command Explanation
+## Command Reference
+
+| Function                        | Library   | Description                                      |
+| :------------------------------ | :-------- | :----------------------------------------------- |
+| `cv2.VideoCapture(0)`           | OpenCV    | Opens the default webcam.                        |
+| `mp.solutions.hands.Hands(...)` | MediaPipe | Initializes the Hand Tracking model.             |
+| `cap.read()`                    | OpenCV    | Captures a single frame from the camera.         |
+| `cv2.flip(image, 1)`            | OpenCV    | Mirrors the image horizontally.                  |
+| `hands.process(image_rgb)`      | MediaPipe | Detecting 21 landmark 3D coordinates.            |
+| `serial.Serial(port, baud)`     | PySerial  | Opens the COM port connection.                   |
+| `ser.write(bytes)`              | PySerial  | Sends data to the robot.                         |
+| `math.hypot(x, y)`              | Python    | Calculates Euclidean distance (pinch detection). |
+
+## Code Walkthrough
 
 ### 1. Setup & Configuration
 
 ```python
 mp_hands = mp.solutions.hands
-hands = mp_hands.Hands(...)
+hands = mp_hands.Hands(max_num_hands=1, min_detection_confidence=0.7)
 ```
 
 - **`mp.solutions.hands`**: Initializes the MediaPipe Hands module.
@@ -34,19 +49,9 @@ while cap.isOpened():
 ```
 
 - **`cv2.VideoCapture(0)`**: Opens the default webcam (Index 0).
-- **`cap.read()`**: Grabs a single frame from the camera.
 - **`cv2.flip(image, 1)`**: Mirrors the image horizontally so moving your hand right moves the robot right (intuitive interaction).
 
-### 3. Hand Tracking
-
-```python
-results = hands.process(image_rgb)
-```
-
-- **`cv2.cvtColor(..., cv2.COLOR_BGR2RGB)`**: MediaPipe expects RGB images, but OpenCV uses BGR. This command converts the color space.
-- **`hands.process()`**: Runs the heavy ML inference to find 21 hand landmarks.
-
-### 4. Logic & Control Mapping
+### 3. Logic & Control Mapping
 
 The script maps specific landmarks to servo motors:
 
@@ -60,23 +65,3 @@ The script maps specific landmarks to servo motors:
 - **Gripper**: Uses Euclidean distance between Thumb and Index finger.
   - `math.hypot(...)`: Calculates the distance.
   - `if dist < 0.05`: **Close Gripper**.
-
-### 5. Data Transmission
-
-```python
-packet = f"B{int(base)}S{int(shoulder)}E{int(elbow)}G{int(gripper)}\n"
-ser.write(packet.encode('utf-8'))
-```
-
-- **`f"..."`**: Formats the data into a string (e.g., "B90S90E90G0").
-- **`ser.write()`**: Sends the bytes over the USB-Serial cable to the robot.
-
-### 6. Drawing & Display
-
-```python
-mp_drawing.draw_landmarks(image, hand_landmarks, ...)
-cv2.imshow('Hand Control', image)
-```
-
-- **`draw_landmarks`**: Overlays the skeleton wireframe on the hand.
-- **`cv2.imshow`**: Updates the desktop window with the new frame.
