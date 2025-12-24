@@ -1,0 +1,9 @@
+.\robot.o: Robot.c
+.\robot.o: D:\Keil\ARM\ARMCC\bin\..\include\stdint.h
+.\robot.o: D:\Keil\ARM\Inc\TI\TM4C123\TM4C123.h
+.\robot.o: D:\Keil\ARM\Inc\TI\TM4C123\TM4C123GH6PM.h
+.\robot.o: D:\Keil\ARM\CMSIS\Include\core_cm4.h
+.\robot.o: D:\Keil\ARM\CMSIS\Include\core_cmInstr.h
+.\robot.o: D:\Keil\ARM\CMSIS\Include\core_cmFunc.h
+.\robot.o: D:\Keil\ARM\CMSIS\Include\core_cm4_simd.h
+.\robot.o: D:\Keil\ARM\Inc\TI\TM4C123\system_TM4C123.h
